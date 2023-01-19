@@ -7,11 +7,12 @@ WINDOW_WIDTH, WINDOW_HEIGHT = 800, 400
 screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 pygame.display.set_caption("Wonderland")
 
-background_sky = pygame.image.load("./characters/arcadeV2.png").convert_alpha()
+background_sky = pygame.image.load("./characters/background.png").convert_alpha()
 background_ground = pygame.image.load("./characters/ground.png").convert_alpha()
 
 text_font = pygame.font.Font("./font/Pixeltype.ttf", 50)
-text = text_font.render("My firstGame", False, "dodgerblue4")
+text = text_font.render("My firstGame", False, (97, 24, 237))
+text_rect = text.get_rect(center=(WINDOW_WIDTH/2, 60))
 
 enemy = pygame.image.load("./characters/1.png").convert_alpha()
 enemy_rect = enemy.get_rect(midbottom=(600, 300))
@@ -32,7 +33,8 @@ while True:
 
     screen.blit(background_sky, (0, 0))
     screen.blit(background_ground, (0, 300))
-    screen.blit(text, (300, 50))
+    pygame.draw.rect(screen, (226, 24, 135), text_rect.inflate(25, 25), width=8, border_radius=5)
+    screen.blit(text, text_rect)
     enemy_rect.right -= 4
     if enemy_rect.right <= 0:
         enemy_rect.left = 800
