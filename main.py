@@ -1,7 +1,6 @@
 import pygame
 import sys
 
-
 pygame.init()
 WINDOW_WIDTH, WINDOW_HEIGHT = 800, 400
 screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
@@ -12,7 +11,7 @@ background_ground = pygame.image.load("./characters/ground.png").convert_alpha()
 
 text_font = pygame.font.Font("./font/Pixeltype.ttf", 50)
 text = text_font.render("My firstGame", False, (97, 24, 237))
-text_rect = text.get_rect(center=(WINDOW_WIDTH/2, 60))
+text_rect = text.get_rect(center=(WINDOW_WIDTH / 2, 60))
 
 enemy = pygame.image.load("./characters/1.png").convert_alpha()
 enemy_rect = enemy.get_rect(midbottom=(600, 300))
@@ -29,10 +28,10 @@ while True:
             pygame.quit()
             sys.exit()
         if event.type == pygame.MOUSEBUTTONDOWN:
-            if player_rect.collidepoint(event.pos):
+            if player_rect.collidepoint(event.pos) and player_rect.bottom >= 300:
                 player_gravity = -20
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_SPACE:
+            if event.key == pygame.K_SPACE and player_rect.bottom >= 300:
                 player_gravity = -20
 
     screen.blit(background_sky, (0, 0))
@@ -46,7 +45,8 @@ while True:
     # player
     player_gravity += 1
     player_rect.y += player_gravity
-    if player_rect.bottom >= 300: player_rect.bottom = 300
+    if player_rect.bottom >= 300:
+        player_rect.bottom = 300
     screen.blit(player, player_rect)
     pygame.display.update()
     clock.tick(60)
