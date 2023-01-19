@@ -20,6 +20,9 @@ enemy_x_pos = 600
 player = pygame.image.load("./characters/plater2.png").convert_alpha()
 player_rect = player.get_rect(midbottom=(80, 300))
 player_gravity = 0
+
+game_active = True
+
 clock = pygame.time.Clock()
 
 while True:
@@ -27,26 +30,42 @@ while True:
         if event.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            if player_rect.collidepoint(event.pos) and player_rect.bottom >= 300:
-                player_gravity = -20
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_SPACE and player_rect.bottom >= 300:
-                player_gravity = -20
 
-    screen.blit(background_sky, (0, 0))
-    screen.blit(background_ground, (0, 300))
-    pygame.draw.rect(screen, (226, 24, 135), text_rect.inflate(25, 25), width=8, border_radius=5)
-    screen.blit(text, text_rect)
-    enemy_rect.right -= 4
-    if enemy_rect.right <= 0:
-        enemy_rect.left = 800
-    screen.blit(enemy, enemy_rect)
-    # player
-    player_gravity += 1
-    player_rect.y += player_gravity
-    if player_rect.bottom >= 300:
-        player_rect.bottom = 300
-    screen.blit(player, player_rect)
+        if game_active:
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if player_rect.collidepoint(event.pos) and player_rect.bottom >= 300:
+                    player_gravity = -20
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE and player_rect.bottom >= 300:
+                    player_gravity = -20
+        else:
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                    game_active = True
+                    enemy_rect.x = 800
+    if game_active: # game
+        screen.blit(background_sky, (0, 0))
+        screen.blit(background_ground, (0, 300))
+        pygame.draw.rect(screen, (226, 24, 135), text_rect.inflate(25, 25), width=8, border_radius=5)
+        screen.blit(text, text_rect)
+
+        enemy_rect.right -= 4
+        if enemy_rect.right <= 0:
+            enemy_rect.left = 800
+        screen.blit(enemy, enemy_rect)
+
+        # player
+        player_gravity += 1
+        player_rect.y += player_gravity
+        if player_rect.bottom >= 300:
+            player_rect.bottom = 300
+        screen.blit(player, player_rect)
+
+        # collision
+        if player_rect.colliderect(enemy_rect):
+            game_active = False
+    else: # intro
+        screen.fill('yellow')
+
     pygame.display.update()
     clock.tick(60)
