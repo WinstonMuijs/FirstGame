@@ -20,6 +20,7 @@ enemy_x_pos = 600
 
 player = pygame.image.load("./characters/plater2.png").convert_alpha()
 player_rect = player.get_rect(midbottom=(80, 300))
+player_gravity = 0
 clock = pygame.time.Clock()
 
 while True:
@@ -27,14 +28,12 @@ while True:
         if event.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
-        # if event.type == pygame.MOUSEMOTION:
-        #     if player_rect.collidepoint(event.pos):
-        #         print("collision")
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if player_rect.collidepoint(event.pos):
+                player_gravity = -20
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE:
-                print('jump')
-        if event.type == pygame.KEYUP:
-            print('release button')
+                player_gravity = -20
 
     screen.blit(background_sky, (0, 0))
     screen.blit(background_ground, (0, 300))
@@ -44,6 +43,9 @@ while True:
     if enemy_rect.right <= 0:
         enemy_rect.left = 800
     screen.blit(enemy, enemy_rect)
+    # player
+    player_gravity += 1
+    player_rect.y += player_gravity
     screen.blit(player, player_rect)
     pygame.display.update()
     clock.tick(60)
