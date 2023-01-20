@@ -3,7 +3,7 @@ import sys
 
 
 def display_score():
-    current_time = pygame.time.get_ticks() - start_time
+    current_time = pygame.time.get_ticks()//1000 - start_time
     score = text_font.render(f"{current_time}", False, (97, 24, 237))
     score_rect = score.get_rect(center=(WINDOW_WIDTH / 2, 60))
     screen.blit(score, score_rect)
@@ -54,7 +54,7 @@ while True:
                 if event.key == pygame.K_SPACE:
                     game_active = True
                     enemy_rect.x = 800
-                    start_time = pygame.time.get_ticks()
+                    start_time = pygame.time.get_ticks()//1000
 
     if game_active:  # game
         screen.blit(background_sky, (0, 0))
