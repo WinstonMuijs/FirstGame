@@ -3,7 +3,7 @@ import sys
 
 
 def display_score():
-    current_time = pygame.time.get_ticks()
+    current_time = pygame.time.get_ticks() - start_time
     score = text_font.render(f"{current_time}", False, (97, 24, 237))
     score_rect = score.get_rect(center=(WINDOW_WIDTH / 2, 60))
     screen.blit(score, score_rect)
@@ -20,6 +20,9 @@ background_ground = pygame.image.load("./characters/ground.png").convert_alpha()
 text_font = pygame.font.Font("./font/Pixeltype.ttf", 50)
 # text = text_font.render("My firstGame", False, (97, 24, 237))
 # text_rect = text.get_rect(center=(WINDOW_WIDTH / 2, 60))
+
+# start time
+start_time = 0
 
 enemy = pygame.image.load("./characters/1.png").convert_alpha()
 enemy_rect = enemy.get_rect(midbottom=(600, 300))
@@ -51,6 +54,8 @@ while True:
                 if event.key == pygame.K_SPACE:
                     game_active = True
                     enemy_rect.x = 800
+                    start_time = pygame.time.get_ticks()
+
     if game_active:  # game
         screen.blit(background_sky, (0, 0))
         screen.blit(background_ground, (0, 300))
@@ -75,6 +80,7 @@ while True:
             game_active = False
     else:  # intro
         screen.fill('yellow')
+
 
     pygame.display.update()
     clock.tick(60)
