@@ -152,6 +152,7 @@ while True:
         game_active = collisions(player_rect, enemies_rect_list)
 
     else:  # intro
+        enemies_rect_list.clear()
         end_game()
 
     pygame.display.update()
