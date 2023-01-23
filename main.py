@@ -15,7 +15,7 @@ def end_game():
     # text_top = pygame.transform.scale2x(text_top)
     text_top_rect = text_top.get_rect(center=(WINDOW_WIDTH/2, 60))
     image_player = pygame.image.load("./characters/character horn girl.png").convert_alpha()
-    # image_player = pygame.transform.scale2x(image_player)
+    image_player = pygame.transform.rotozoom(image_player, 0, 1.5)
     image_rect = image_player.get_rect(center=(WINDOW_WIDTH/2, 150))
     text_bottom = text_font.render(f"Press SpaceButton", False, "lightgreen").convert()
     text_bottom = pygame.transform.scale2x(text_bottom)
