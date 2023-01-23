@@ -1,28 +1,42 @@
+import random
+
 import pygame
 import sys
 
 
 def display_score():
-    current_time = pygame.time.get_ticks()//1000 - start_time
+    current_time = pygame.time.get_ticks() // 1000 - start_time
     score = text_font.render(f"Score: {current_time}", False, (97, 24, 237))
     score_rect = score.get_rect(center=(WINDOW_WIDTH / 2, 60))
     screen.blit(score, score_rect)
     return current_time
 
 
+def enemy_movement(enemy_list):
+    if enemy_list:
+        for enemy_rec in enemy_list:
+            enemy_rec.x -= 5
+            screen.blit(enemy, enemy_rec)
+            # deleting obstacle when leaving screen.
+        enemy_list = [enemie for enemie in enemy_list if enemie.x > -100]
+        return enemy_list
+    else:
+        return []
+
+
 def end_game():
     screen.fill("dodgerblue4")
     text_top = text_font.render(f"PixelArt Game", False, "lightgreen").convert()
     # text_top = pygame.transform.scale2x(text_top)
-    text_top_rect = text_top.get_rect(center=(WINDOW_WIDTH/2, 60))
+    text_top_rect = text_top.get_rect(center=(WINDOW_WIDTH / 2, 60))
     image_player = pygame.image.load("./characters/character horn girl.png").convert_alpha()
     image_player = pygame.transform.rotozoom(image_player, 0, 1.5)
-    image_rect = image_player.get_rect(center=(WINDOW_WIDTH/2, 150))
+    image_rect = image_player.get_rect(center=(WINDOW_WIDTH / 2, 150))
     text_bottom = text_font.render(f"Press SpaceButton to play!", False, "red").convert()
     # text_bottom = pygame.transform.scale2x(text_bottom)
-    text_bottom_rect = text_bottom.get_rect(center=(WINDOW_WIDTH/2, 300))
+    text_bottom_rect = text_bottom.get_rect(center=(WINDOW_WIDTH / 2, 300))
     end_score = text_font.render(f"Your Score: {score}", False, "lightgreen")
-    end_score_rect = end_score.get_rect(center=(WINDOW_WIDTH/2, 350))
+    end_score_rect = end_score.get_rect(center=(WINDOW_WIDTH / 2, 350))
     if score >= 5:
         screen.blit(text_bottom, text_bottom_rect)
         # screen.blit(text_top, text_top_rect)
@@ -51,12 +65,19 @@ text_font = pygame.font.Font("./font/Pixeltype.ttf", 50)
 start_time = 0
 
 # end score
-score =0
+score = 0
 
+# timer
+obstacle_timer = pygame.USEREVENT + 1
+pygame.time.set_timer(obstacle_timer, 900)
+
+#  enemies
+enemies_rect_list = []
 enemy = pygame.image.load("./characters/1.png").convert_alpha()
 enemy_rect = enemy.get_rect(midbottom=(600, 300))
 enemy_x_pos = 600
 
+# player
 player = pygame.image.load("./characters/plater2.png").convert_alpha()
 player_rect = player.get_rect(midbottom=(80, 300))
 player_gravity = 0
@@ -78,12 +99,16 @@ while True:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE and player_rect.bottom >= 300:
                     player_gravity = -20
+            if event.type == obstacle_timer:
+                enemies_rect_list.append(enemy.get_rect(midbottom=(random.randint(900, 1100), 300)))
         else:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
                     game_active = True
                     enemy_rect.x = 800
-                    start_time = pygame.time.get_ticks()//1000
+                    start_time = pygame.time.get_ticks() // 1000
+
+
 
     if game_active:  # game
         screen.blit(background_sky, (0, 0))
@@ -92,10 +117,10 @@ while True:
         # screen.blit(text, score_rect)
         score = display_score()
 
-        enemy_rect.right -= 4
-        if enemy_rect.right <= 0:
-            enemy_rect.left = 800
-        screen.blit(enemy, enemy_rect)
+        # enemy_rect.right -= 4
+        # if enemy_rect.right <= 0:
+        #     enemy_rect.left = 800
+        # screen.blit(enemy, enemy_rect)
 
         # player
         player_gravity += 1
@@ -104,9 +129,14 @@ while True:
             player_rect.bottom = 300
         screen.blit(player, player_rect)
 
+        # enemy movement
+        enemies_rect_list = enemy_movement(enemies_rect_list)
+
         # collision
-        if player_rect.colliderect(enemy_rect):
-            game_active = False
+        for enemy_rect in enemies_rect_list:
+            if player_rect.colliderect(enemy_rect):
+                game_active = False
+
     else:  # intro
         end_game()
 
