@@ -4,9 +4,25 @@ import sys
 
 def display_score():
     current_time = pygame.time.get_ticks()//1000 - start_time
-    score = text_font.render(f"{current_time}", False, (97, 24, 237))
+    score = text_font.render(f"Score: {current_time}", False, (97, 24, 237))
     score_rect = score.get_rect(center=(WINDOW_WIDTH / 2, 60))
     screen.blit(score, score_rect)
+
+
+def end_game():
+    screen.fill("dodgerblue4")
+    text_top = text_font.render(f"PixelArt", False, "lightgreen").convert()
+    # text_top = pygame.transform.scale2x(text_top)
+    text_top_rect = text_top.get_rect(center=(WINDOW_WIDTH/2, 60))
+    image_player = pygame.image.load("./characters/character horn girl.png").convert_alpha()
+    # image_player = pygame.transform.scale2x(image_player)
+    image_rect = image_player.get_rect(center=(WINDOW_WIDTH/2, 150))
+    text_bottom = text_font.render(f"Press SpaceButton", False, "lightgreen").convert()
+    text_bottom = pygame.transform.scale2x(text_bottom)
+    text_bottom_rect = text_bottom.get_rect(center=(WINDOW_WIDTH/2, 300))
+    screen.blit(text_top, text_top_rect)
+    screen.blit(image_player, image_rect)
+    screen.blit(text_bottom, text_bottom_rect)
 
 
 pygame.init()
@@ -79,8 +95,7 @@ while True:
         if player_rect.colliderect(enemy_rect):
             game_active = False
     else:  # intro
-        screen.fill('yellow')
-
+        end_game()
 
     pygame.display.update()
     clock.tick(60)
