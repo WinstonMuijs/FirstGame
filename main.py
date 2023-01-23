@@ -7,22 +7,32 @@ def display_score():
     score = text_font.render(f"Score: {current_time}", False, (97, 24, 237))
     score_rect = score.get_rect(center=(WINDOW_WIDTH / 2, 60))
     screen.blit(score, score_rect)
+    return current_time
 
 
 def end_game():
     screen.fill("dodgerblue4")
-    text_top = text_font.render(f"PixelArt", False, "lightgreen").convert()
+    text_top = text_font.render(f"PixelArt Game", False, "lightgreen").convert()
     # text_top = pygame.transform.scale2x(text_top)
     text_top_rect = text_top.get_rect(center=(WINDOW_WIDTH/2, 60))
     image_player = pygame.image.load("./characters/character horn girl.png").convert_alpha()
     image_player = pygame.transform.rotozoom(image_player, 0, 1.5)
     image_rect = image_player.get_rect(center=(WINDOW_WIDTH/2, 150))
-    text_bottom = text_font.render(f"Press SpaceButton", False, "lightgreen").convert()
-    text_bottom = pygame.transform.scale2x(text_bottom)
+    text_bottom = text_font.render(f"Press SpaceButton to play!", False, "red").convert()
+    # text_bottom = pygame.transform.scale2x(text_bottom)
     text_bottom_rect = text_bottom.get_rect(center=(WINDOW_WIDTH/2, 300))
-    screen.blit(text_top, text_top_rect)
-    screen.blit(image_player, image_rect)
-    screen.blit(text_bottom, text_bottom_rect)
+    end_score = text_font.render(f"Your Score: {score}", False, "lightgreen")
+    end_score_rect = end_score.get_rect(center=(WINDOW_WIDTH/2, 350))
+    if score >= 5:
+        screen.blit(text_bottom, text_bottom_rect)
+        # screen.blit(text_top, text_top_rect)
+        screen.blit(image_player, image_rect)
+        screen.blit(end_score, end_score_rect)
+    else:
+
+        screen.blit(text_top, text_top_rect)
+        screen.blit(image_player, image_rect)
+        screen.blit(text_bottom, text_bottom_rect)
 
 
 pygame.init()
@@ -39,6 +49,9 @@ text_font = pygame.font.Font("./font/Pixeltype.ttf", 50)
 
 # start time
 start_time = 0
+
+# end score
+score =0
 
 enemy = pygame.image.load("./characters/1.png").convert_alpha()
 enemy_rect = enemy.get_rect(midbottom=(600, 300))
@@ -77,7 +90,7 @@ while True:
         screen.blit(background_ground, (0, 300))
         # pygame.draw.rect(screen, (226, 24, 135), score_rect.inflate(25, 25), width=8, border_radius=5)
         # screen.blit(text, score_rect)
-        display_score()
+        score = display_score()
 
         enemy_rect.right -= 4
         if enemy_rect.right <= 0:
