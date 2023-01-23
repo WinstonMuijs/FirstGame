@@ -34,6 +34,16 @@ def collisions(player, enemies):
                 return False
     return True
 
+def player_animation():
+    global player, player_index
+    if player_rect.bottom < 300:
+        player = player_jump
+    else:
+        player_index += 0.1
+        if player_index >= len(player_move): player_index = 0
+        player = player_move[int(player_index)]
+
+
 def end_game():
     screen.fill("dodgerblue4")
     text_top = text_font.render(f"PixelArt Game", False, "lightgreen").convert()
@@ -45,7 +55,7 @@ def end_game():
     text_bottom = text_font.render(f"Press SpaceButton to play!", False, "red").convert()
     # text_bottom = pygame.transform.scale2x(text_bottom)
     text_bottom_rect = text_bottom.get_rect(center=(WINDOW_WIDTH / 2, 300))
-    end_score = text_font.render(f"Your Score: {score}", False, "lightgreen")
+    end_score = text_font.render(f"Your Score: {score}", False, "lightgreen").convert_alpha()
     end_score_rect = end_score.get_rect(center=(WINDOW_WIDTH / 2, 350))
     if score >= 5:
         screen.blit(text_bottom, text_bottom_rect)
@@ -91,7 +101,12 @@ flying_enemy = pygame.image.load("./characters/frame4.png").convert_alpha()
 
 
 # player
-player = pygame.image.load("./characters/plater2.png").convert_alpha()
+player_walk1 = pygame.image.load("./characters/frame-1.png").convert_alpha()
+player_walk2 = player = pygame.image.load("./characters/frame-3.png").convert_alpha()
+player_move = [player_walk1, player_walk2]
+player_index = 0
+player_jump = player = pygame.image.load("./characters/jump.png").convert_alpha()
+player = player_move[player_index]
 player_rect = player.get_rect(midbottom=(80, 300))
 player_gravity = 0
 
@@ -143,6 +158,7 @@ while True:
         player_rect.y += player_gravity
         if player_rect.bottom >= 300:
             player_rect.bottom = 300
+        player_animation()
         screen.blit(player, player_rect)
 
         # enemy movement
@@ -152,8 +168,10 @@ while True:
         game_active = collisions(player_rect, enemies_rect_list)
 
     else:  # intro
-        enemies_rect_list.clear()
         end_game()
+        enemies_rect_list.clear()
+        player_rect.midbottom=(80,300)
+        player_gravity = 0
 
     pygame.display.update()
     clock.tick(60)
