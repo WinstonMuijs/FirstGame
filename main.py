@@ -16,13 +16,23 @@ def enemy_movement(enemy_list):
     if enemy_list:
         for enemy_rec in enemy_list:
             enemy_rec.x -= 5
-            screen.blit(enemy, enemy_rec)
+            if enemy_rec.bottom == 300:
+                screen.blit(enemy, enemy_rec)
+            else:
+                screen.blit(flying_enemy, enemy_rec)
+
             # deleting obstacle when leaving screen.
         enemy_list = [enemie for enemie in enemy_list if enemie.x > -100]
         return enemy_list
     else:
         return []
 
+def collisions(player, enemies):
+    if enemies:
+        for enemy in enemies:
+            if player.colliderect(enemy):
+                return False
+    return True
 
 def end_game():
     screen.fill("dodgerblue4")
@@ -75,7 +85,10 @@ pygame.time.set_timer(obstacle_timer, 900)
 enemies_rect_list = []
 enemy = pygame.image.load("./characters/1.png").convert_alpha()
 enemy_rect = enemy.get_rect(midbottom=(600, 300))
-enemy_x_pos = 600
+# enemy_x_pos = 600
+
+flying_enemy = pygame.image.load("./characters/frame4.png").convert_alpha()
+
 
 # player
 player = pygame.image.load("./characters/plater2.png").convert_alpha()
@@ -100,7 +113,10 @@ while True:
                 if event.key == pygame.K_SPACE and player_rect.bottom >= 300:
                     player_gravity = -20
             if event.type == obstacle_timer:
-                enemies_rect_list.append(enemy.get_rect(midbottom=(random.randint(900, 1100), 300)))
+                if random.randint(0, 2):
+                    enemies_rect_list.append(enemy.get_rect(midbottom=(random.randint(900, 1100), 300)))
+                else:
+                    enemies_rect_list.append(flying_enemy.get_rect(midbottom=(random.randint(900, 1100), 210)))
         else:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
@@ -133,9 +149,7 @@ while True:
         enemies_rect_list = enemy_movement(enemies_rect_list)
 
         # collision
-        for enemy_rect in enemies_rect_list:
-            if player_rect.colliderect(enemy_rect):
-                game_active = False
+        game_active = collisions(player_rect, enemies_rect_list)
 
     else:  # intro
         end_game()
