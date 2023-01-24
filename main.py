@@ -27,12 +27,14 @@ def enemy_movement(enemy_list):
     else:
         return []
 
+
 def collisions(player, enemies):
     if enemies:
         for enemy in enemies:
             if player.colliderect(enemy):
                 return False
     return True
+
 
 def player_animation():
     global player, player_index
@@ -91,21 +93,42 @@ score = 0
 obstacle_timer = pygame.USEREVENT + 1
 pygame.time.set_timer(obstacle_timer, 900)
 
+# timer enemies
+enemy_timer = pygame.USEREVENT + 2
+pygame.time.set_timer(enemy_timer, 500)
+
+# crab timer
+crab_timer = pygame.USEREVENT + 3
+pygame.time.set_timer(crab_timer, 200)
+
 #  enemies
 enemies_rect_list = []
-enemy = pygame.image.load("./characters/1.png").convert_alpha()
+enemy_one = pygame.image.load("./characters/1.png").convert_alpha()
+enemy_two = pygame.image.load("./characters/4.png").convert_alpha()
+enemy_move = [enemy_one, enemy_two]
+enemy_index = 0
+enemy = enemy_move[enemy_index]
+
 enemy_rect = enemy.get_rect(midbottom=(600, 300))
 # enemy_x_pos = 600
 
-flying_enemy = pygame.image.load("./characters/frame4.png").convert_alpha()
 
+# crab enemy
+crab_one = pygame.image.load("./characters/crab.png").convert_alpha()
+crab_two = pygame.image.load("./characters/Naamloos-1.png").convert_alpha()
+crab_move = [crab_one, crab_two]
+crab_index = 0
+flying_enemy = crab_move[crab_index]
+
+
+# flying_enemy = pygame.image.load("./characters/frame4.png").convert_alpha()
 
 # player
 player_walk1 = pygame.image.load("./characters/frame-1.png").convert_alpha()
 player_walk2 = player = pygame.image.load("./characters/frame-3.png").convert_alpha()
 player_move = [player_walk1, player_walk2]
 player_index = 0
-player_jump = player = pygame.image.load("./characters/jump.png").convert_alpha()
+player_jump = pygame.image.load("./characters/jump.png").convert_alpha()
 player = player_move[player_index]
 player_rect = player.get_rect(midbottom=(80, 300))
 player_gravity = 0
@@ -124,22 +147,33 @@ while True:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if player_rect.collidepoint(event.pos) and player_rect.bottom >= 300:
                     player_gravity = -20
+
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE and player_rect.bottom >= 300:
                     player_gravity = -20
+
             if event.type == obstacle_timer:
                 if random.randint(0, 2):
                     enemies_rect_list.append(enemy.get_rect(midbottom=(random.randint(900, 1100), 300)))
                 else:
                     enemies_rect_list.append(flying_enemy.get_rect(midbottom=(random.randint(900, 1100), 210)))
+
+            if event.type == enemy_timer:
+                if enemy_index == 0: enemy_index = 1
+                else: enemy_index = 0
+                enemy = enemy_move[enemy_index]
+
+            if event.type == crab_timer:
+                if crab_index == 0: crab_index = 1
+                else: crab_index = 0
+                flying_enemy = crab_move[crab_index]
+
         else:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
                     game_active = True
                     enemy_rect.x = 800
                     start_time = pygame.time.get_ticks() // 1000
-
-
 
     if game_active:  # game
         screen.blit(background_sky, (0, 0))
@@ -170,7 +204,7 @@ while True:
     else:  # intro
         end_game()
         enemies_rect_list.clear()
-        player_rect.midbottom=(80,300)
+        player_rect.midbottom = (80, 300)
         player_gravity = 0
 
     pygame.display.update()
