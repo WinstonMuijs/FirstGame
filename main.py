@@ -4,6 +4,44 @@ import pygame
 import sys
 
 
+class Player(pygame.sprite.Sprite):
+    def __init__(self):
+        super().__init__()
+        player_walk1 = pygame.image.load("./characters/frame-1.png").convert_alpha()
+        player_walk2 = pygame.image.load("./characters/frame-3.png").convert_alpha()
+        self.player_move = [player_walk1, player_walk2]
+        self.player_index = 0
+        self.player_jump = pygame.image.load("./characters/jump.png").convert_alpha()
+
+        self.image = self.player_move[self.player_index]
+        self.rect = self.image.get_rect(midbottom=(200, 300))
+        self.gravity = 0
+
+    def player_input(self):
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_SPACE] and self.rect.bottom >= 300:
+            self.gravity = -20
+
+    def apply_gravity(self):
+        self.gravity += 1
+        self.rect.y += self.gravity
+        if self.rect.bottom >= 300:
+            self.rect.bottom = 300
+
+    def animation_state(self):
+        if self.rect.bottom < 300:
+            self.image = self.player_jump
+        else:
+            self.player_index += 0.1
+            if self.player_index >= len(self.player_move): self.player_index = 0
+            self.image = self.player_move[int(self.player_index)]
+
+    def update(self):
+        self.player_input()
+        self.apply_gravity()
+        self.animation_state()
+
+
 def display_score():
     current_time = pygame.time.get_ticks() // 1000 - start_time
     score = text_font.render(f"Score: {current_time}", False, (97, 24, 237))
@@ -120,10 +158,12 @@ crab_move = [crab_one, crab_two]
 crab_index = 0
 flying_enemy = crab_move[crab_index]
 
-
 # flying_enemy = pygame.image.load("./characters/frame4.png").convert_alpha()
 
 # player
+player1 = pygame.sprite.GroupSingle()
+player1.add(Player())
+
 player_walk1 = pygame.image.load("./characters/frame-1.png").convert_alpha()
 player_walk2 = player = pygame.image.load("./characters/frame-3.png").convert_alpha()
 player_move = [player_walk1, player_walk2]
@@ -159,13 +199,17 @@ while True:
                     enemies_rect_list.append(flying_enemy.get_rect(midbottom=(random.randint(900, 1100), 210)))
 
             if event.type == enemy_timer:
-                if enemy_index == 0: enemy_index = 1
-                else: enemy_index = 0
+                if enemy_index == 0:
+                    enemy_index = 1
+                else:
+                    enemy_index = 0
                 enemy = enemy_move[enemy_index]
 
             if event.type == crab_timer:
-                if crab_index == 0: crab_index = 1
-                else: crab_index = 0
+                if crab_index == 0:
+                    crab_index = 1
+                else:
+                    crab_index = 0
                 flying_enemy = crab_move[crab_index]
 
         else:
@@ -188,12 +232,17 @@ while True:
         # screen.blit(enemy, enemy_rect)
 
         # player
+
         player_gravity += 1
         player_rect.y += player_gravity
         if player_rect.bottom >= 300:
             player_rect.bottom = 300
         player_animation()
         screen.blit(player, player_rect)
+        player1.draw(screen)
+        player1.update()
+
+
 
         # enemy movement
         enemies_rect_list = enemy_movement(enemies_rect_list)
