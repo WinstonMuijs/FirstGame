@@ -16,11 +16,23 @@ class Player(pygame.sprite.Sprite):
         self.image = self.player_move[self.player_index]
         self.rect = self.image.get_rect(midbottom=(200, 300))
         self.gravity = 0
+        self.movement = 0
 
     def player_input(self):
         keys = pygame.key.get_pressed()
         if keys[pygame.K_SPACE] and self.rect.bottom >= 300:
             self.gravity = -20
+        if keys[pygame.K_RIGHT] and self.rect.bottom == 300:
+            self.movement = 1
+            self.rect.x += self.movement
+            if self.rect.x > WINDOW_WIDTH + 50:
+                self.rect.x = 10
+        if keys[pygame.K_LEFT] and self.rect.bottom == 300:
+            self.movement = -1
+            self.rect.x += self.movement
+            if self.rect.x < -50:
+                self.rect.x = 10
+
 
     def apply_gravity(self):
         self.gravity += 1
