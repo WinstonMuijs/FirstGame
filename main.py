@@ -1,5 +1,4 @@
 import random
-
 import pygame
 import sys
 
@@ -14,9 +13,12 @@ class Player(pygame.sprite.Sprite):
         self.player_jump = pygame.image.load("./characters/jump.png").convert_alpha()
 
         self.image = self.player_move[self.player_index]
-        self.rect = self.image.get_rect(midbottom=(200, 300))
+        self.rect = self.image.get_rect(midbottom=(50, 300))
         self.gravity = 0
         self.movement = 0
+
+        # self.jump_sound = pygame.mixer.Sound('./audio/jump.mp3')
+        # self.jump_sound.set_volume(0.5)
 
     def player_input(self):
         keys = pygame.key.get_pressed()
@@ -32,7 +34,6 @@ class Player(pygame.sprite.Sprite):
             self.rect.x += self.movement
             if self.rect.x < -50:
                 self.rect.x = 10
-
 
     def apply_gravity(self):
         self.gravity += 1
@@ -54,6 +55,39 @@ class Player(pygame.sprite.Sprite):
         self.animation_state()
 
 
+class Enemies(pygame.sprite.Sprite):
+    def __init__(self, type):
+        super().__init__()
+
+        if type == "crab":
+            crab_one = pygame.image.load("./characters/crab.png").convert_alpha()
+            crab_two = pygame.image.load("./characters/Naamloos-1.png").convert_alpha()
+            self.move = [crab_one, crab_two]
+            y_pos = 210
+        else:
+            enemy_one = pygame.image.load("./characters/1.png").convert_alpha()
+            enemy_two = pygame.image.load("./characters/4.png").convert_alpha()
+            self.move = [enemy_one, enemy_two]
+            y_pos = 300
+
+        self.animation_index = 0
+        self.image = self.move[self.animation_index]
+        self.rect = self.image.get_rect(midbottom=(random.randint(900, 1100), y_pos))
+
+    def animation_state(self):
+        self.animation_index += 0.1
+        if self.animation_index >= len(self.move): self.animation_index = 0
+
+    def destroy(self):
+        if self.rect.x <= -100:
+            self.kill()
+
+    def update(self):
+        self.animation_state()
+        self.rect.x -= 5
+        self.destroy()
+
+
 def display_score():
     current_time = pygame.time.get_ticks() // 1000 - start_time
     score = text_font.render(f"Score: {current_time}", False, (97, 24, 237))
@@ -62,38 +96,46 @@ def display_score():
     return current_time
 
 
-def enemy_movement(enemy_list):
-    if enemy_list:
-        for enemy_rec in enemy_list:
-            enemy_rec.x -= 5
-            if enemy_rec.bottom == 300:
-                screen.blit(enemy, enemy_rec)
-            else:
-                screen.blit(flying_enemy, enemy_rec)
+# def enemy_movement(enemy_list):
+#     if enemy_list:
+#         for enemy_rec in enemy_list:
+#             enemy_rec.x -= 5
+#             if enemy_rec.bottom == 300:
+#                 screen.blit(enemy, enemy_rec)
+#             else:
+#                 screen.blit(flying_enemy, enemy_rec)
+#
+#             # deleting obstacle when leaving screen.
+#         enemy_list = [enemie for enemie in enemy_list if enemie.x > -100]
+#         return enemy_list
+#     else:
+#         return []
 
-            # deleting obstacle when leaving screen.
-        enemy_list = [enemie for enemie in enemy_list if enemie.x > -100]
-        return enemy_list
+
+# def collisions(player, enemies):
+#     if enemies:
+#         for enemy in enemies:
+#             if player.colliderect(enemy):
+#                 return False
+#     return True
+
+
+def collision_sprite():
+    if pygame.sprite.spritecollide(player1.sprite, enemy_group, False):
+        enemy_group.empty()
+        return False
     else:
-        return []
+        return True
 
 
-def collisions(player, enemies):
-    if enemies:
-        for enemy in enemies:
-            if player.colliderect(enemy):
-                return False
-    return True
-
-
-def player_animation():
-    global player, player_index
-    if player_rect.bottom < 300:
-        player = player_jump
-    else:
-        player_index += 0.1
-        if player_index >= len(player_move): player_index = 0
-        player = player_move[int(player_index)]
+# def player_animation():
+#     global player, player_index
+#     if player_rect.bottom < 300:
+#         player = player_jump
+#     else:
+#         player_index += 0.1
+#         if player_index >= len(player_move): player_index = 0
+#         player = player_move[int(player_index)]
 
 
 def end_game():
@@ -125,7 +167,14 @@ pygame.init()
 WINDOW_WIDTH, WINDOW_HEIGHT = 800, 400
 screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 pygame.display.set_caption("Wonderland")
+# start time
+start_time = 0
+# end score
+score = 0
+game_active = True
+clock = pygame.time.Clock()
 
+# sky and ground
 background_sky = pygame.image.load("./characters/background.png").convert_alpha()
 background_ground = pygame.image.load("./characters/ground.png").convert_alpha()
 
@@ -133,11 +182,12 @@ text_font = pygame.font.Font("./font/Pixeltype.ttf", 50)
 # text = text_font.render("My firstGame", False, (97, 24, 237))
 # text_rect = text.get_rect(center=(WINDOW_WIDTH / 2, 60))
 
-# start time
-start_time = 0
-
-# end score
-score = 0
+# Groups
+# player
+player1 = pygame.sprite.GroupSingle()
+player1.add(Player())
+# enemy
+enemy_group = pygame.sprite.Group()
 
 # timer
 obstacle_timer = pygame.USEREVENT + 1
@@ -185,10 +235,6 @@ player = player_move[player_index]
 player_rect = player.get_rect(midbottom=(80, 300))
 player_gravity = 0
 
-game_active = True
-
-clock = pygame.time.Clock()
-
 while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -196,40 +242,41 @@ while True:
             sys.exit()
 
         if game_active:
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if player_rect.collidepoint(event.pos) and player_rect.bottom >= 300:
-                    player_gravity = -20
-
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE and player_rect.bottom >= 300:
-                    player_gravity = -20
+            # if event.type == pygame.MOUSEBUTTONDOWN:
+            #     if player_rect.collidepoint(event.pos) and player_rect.bottom >= 300:
+            #         player_gravity = -20
+            #
+            # if event.type == pygame.KEYDOWN:
+            #     if event.key == pygame.K_SPACE and player_rect.bottom >= 300:
+            #         player_gravity = -20
 
             if event.type == obstacle_timer:
-                if random.randint(0, 2):
-                    enemies_rect_list.append(enemy.get_rect(midbottom=(random.randint(900, 1100), 300)))
-                else:
-                    enemies_rect_list.append(flying_enemy.get_rect(midbottom=(random.randint(900, 1100), 210)))
+                enemy_group.add(Enemies(random.choice(['crab', 'monster', 'monster'])))
+                # if random.randint(0, 2):
+                #     enemies_rect_list.append(enemy.get_rect(midbottom=(random.randint(900, 1100), 300)))
+                # else:
+                #     enemies_rect_list.append(flying_enemy.get_rect(midbottom=(random.randint(900, 1100), 210)))
 
-            if event.type == enemy_timer:
-                if enemy_index == 0:
-                    enemy_index = 1
-                else:
-                    enemy_index = 0
-                enemy = enemy_move[enemy_index]
-
-            if event.type == crab_timer:
-                if crab_index == 0:
-                    crab_index = 1
-                else:
-                    crab_index = 0
-                flying_enemy = crab_move[crab_index]
+            # if event.type == enemy_timer:
+            #     if enemy_index == 0:
+            #         enemy_index = 1
+            #     else:
+            #         enemy_index = 0
+            #     enemy = enemy_move[enemy_index]
+            #
+            # if event.type == crab_timer:
+            #     if crab_index == 0:
+            #         crab_index = 1
+            #     else:
+            #         crab_index = 0
+            #     flying_enemy = crab_move[crab_index]
 
         else:
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE:
-                    game_active = True
-                    enemy_rect.x = 800
-                    start_time = pygame.time.get_ticks() // 1000
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                game_active = True
+                enemy_rect.x = 800
+                start_time = pygame.time.get_ticks() // 1000
+                player1.sprite.rect.x = 65
 
     if game_active:  # game
         screen.blit(background_sky, (0, 0))
@@ -245,28 +292,29 @@ while True:
 
         # player
 
-        player_gravity += 1
-        player_rect.y += player_gravity
-        if player_rect.bottom >= 300:
-            player_rect.bottom = 300
-        player_animation()
-        screen.blit(player, player_rect)
+        # player_gravity += 1
+        # player_rect.y += player_gravity
+        # if player_rect.bottom >= 300:
+        #     player_rect.bottom = 300
+        # player_animation()
+        # screen.blit(player, player_rect)
         player1.draw(screen)
         player1.update()
 
-
-
+        enemy_group.draw(screen)
+        enemy_group.update()
         # enemy movement
-        enemies_rect_list = enemy_movement(enemies_rect_list)
+        # enemies_rect_list = enemy_movement(enemies_rect_list)
 
         # collision
-        game_active = collisions(player_rect, enemies_rect_list)
+        # game_active = collisions(player_rect, enemies_rect_list)
+        game_active = collision_sprite()
 
     else:  # intro
         end_game()
         enemies_rect_list.clear()
         player_rect.midbottom = (80, 300)
-        player_gravity = 0
+        # player_gravity = 0
 
     pygame.display.update()
     clock.tick(60)
