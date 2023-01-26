@@ -17,23 +17,32 @@ class Player(pygame.sprite.Sprite):
         self.gravity = 0
         self.movement = 0
 
-        # self.jump_sound = pygame.mixer.Sound('./audio/jump.mp3')
-        # self.jump_sound.set_volume(0.5)
+        # import sound
+        self.jump_sound = pygame.mixer.Sound('./audio/jump.mp3')
+        self.walking_sound = pygame.mixer.Sound("./audio/step_cloth1 (1).mp3")
+        self.jump_sound.set_volume(0.5)
+        self.walking_sound.set_volume(0.3)
 
     def player_input(self):
         keys = pygame.key.get_pressed()
         if keys[pygame.K_SPACE] and self.rect.bottom >= 300:
             self.gravity = -20
+            self.jump_sound.play()
+
         if keys[pygame.K_RIGHT] and self.rect.bottom == 300:
             self.movement = 1
             self.rect.x += self.movement
+            self.walking_sound.play()
             if self.rect.x > WINDOW_WIDTH + 50:
                 self.rect.x = 10
+
         if keys[pygame.K_LEFT] and self.rect.bottom == 300:
             self.movement = -1
             self.rect.x += self.movement
+            self.walking_sound.play()
             if self.rect.x < -50:
                 self.rect.x = 10
+
 
     def apply_gravity(self):
         self.gravity += 1
@@ -77,6 +86,7 @@ class Enemies(pygame.sprite.Sprite):
     def animation_state(self):
         self.animation_index += 0.1
         if self.animation_index >= len(self.move): self.animation_index = 0
+        self.image = self.move[int(self.animation_index)]
 
     def destroy(self):
         if self.rect.x <= -100:
@@ -173,6 +183,10 @@ start_time = 0
 score = 0
 game_active = True
 clock = pygame.time.Clock()
+background_music = pygame.mixer.Sound('./audio/music.wav')
+background_music.set_volume(0.5)
+background_music.play(loops=-1)
+
 
 # sky and ground
 background_sky = pygame.image.load("./characters/background.png").convert_alpha()
